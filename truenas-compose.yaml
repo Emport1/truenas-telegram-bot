@@ -1,0 +1,26 @@
+# Paste into Apps > Discover Apps > three-dot menu > Install via YAML.
+# Replace the image with the immutable tag you published (ideally include a sha256 digest).
+services:
+  bot:
+    image: ghcr.io/emport1/truenas-telegram-bot:latest
+    restart: unless-stopped
+    environment:
+      TELEGRAM_BOT_TOKEN: "REPLACE_TELEGRAM_TOKEN"
+      TELEGRAM_ALLOWED_USER_IDS: "REPLACE_NUMERIC_USER_ID"
+      X_AUTH_TOKEN: "REPLACE_X_AUTH_TOKEN_COOKIE"
+      X_CT0: "REPLACE_X_CT0_COOKIE"
+      X_MAX_REPLIES: "5000"
+      X_ACCOUNT_DB: "/tmp/accounts.db"
+      TWS_TELEMETRY: "0"
+      TWS_HTTP_BACKEND: "curl"
+    user: "568:568"
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 128
+    mem_limit: 384m
+    cpus: 1.0

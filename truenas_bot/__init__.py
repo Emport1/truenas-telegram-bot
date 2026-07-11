@@ -1,0 +1,2 @@
+"""TrueNAS Telegram bot."""
+
