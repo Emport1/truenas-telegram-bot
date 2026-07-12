@@ -40,7 +40,8 @@ $configured = $configured.Replace('REPLACE_NUMERIC_USER_ID', $userId)
 $configured = $configured.Replace('REPLACE_X_AUTH_TOKEN_COOKIE', $authToken)
 $configured = $configured.Replace('REPLACE_X_CT0_COOKIE', $ct0)
 $destination = Join-Path $root 'truenas-compose.private.yaml'
-Set-Content -LiteralPath $destination -Value $configured -Encoding utf8NoBOM
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[IO.File]::WriteAllText($destination, $configured, $utf8NoBom)
 
 $telegramToken = $authToken = $ct0 = $configured = $null
 Write-Host "Created $destination"
