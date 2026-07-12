@@ -25,14 +25,12 @@ Message `@userinfobot` from the Telegram account allowed to control the bot and 
 
 ## 4. Install on TrueNAS 25.10
 
-1. Edit `truenas-compose.yaml` locally:
-   - the image is already set to `ghcr.io/emport1/truenas-telegram-bot:latest`;
-   - replace the Telegram token and numeric user ID;
-   - replace both X cookie values.
-2. In TrueNAS open **Apps > Discover Apps > ⋮ > Install via YAML**.
-3. Name the app `telegram-truenas-bot`, paste the edited YAML, and click **Save**.
-4. Select the installed app and open **Workloads > Logs**. A healthy app starts Telegram long polling without an exception.
-5. In Telegram send `/start`, then `/twitter https://x.com/.../status/...`.
+1. From PowerShell in this project directory, run `./scripts/configure-deployment.ps1`. Enter the numeric Telegram ID, Telegram token, `auth_token`, and `ct0` when prompted. Secret input stays hidden.
+2. The helper creates the git-ignored `truenas-compose.private.yaml`. Open that file only to copy its contents.
+3. In TrueNAS open **Apps > Discover Apps > ⋮ > Install via YAML**.
+4. Name the app `telegram-truenas-bot`, paste the private YAML, and click **Save**.
+5. Select the installed app and open **Workloads > Logs**. A healthy app starts Telegram long polling without an exception.
+6. In Telegram send `/start`, then `/twitter https://x.com/.../status/...`.
 
 The YAML contains live credentials. Keep your edited copy private and do not commit it. The repository's template contains placeholders only.
 
