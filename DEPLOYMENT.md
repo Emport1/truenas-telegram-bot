@@ -25,7 +25,7 @@ Message `@userinfobot` from the Telegram account allowed to control the bot and 
 
 ## 4. Install on TrueNAS 25.10
 
-1. From PowerShell in this project directory, run `./scripts/configure-deployment.ps1`. Enter the numeric Telegram ID, Telegram token, `auth_token`, and `ct0` when prompted. Secret input stays hidden.
+1. From PowerShell in this project directory, run `./scripts/configure-deployment.ps1`. Enter the numeric Telegram ID, Telegram token, `auth_token`, and `ct0` when prompted. Secret input stays hidden. In Windows PowerShell, paste hidden values with **right-click** or **Ctrl+Shift+V**; plain Ctrl+V can insert an invalid control character.
 2. The helper creates the git-ignored `truenas-compose.private.yaml`. Open that file only to copy its contents.
 3. In TrueNAS open **Apps > Discover Apps > ⋮ > Install via YAML**.
 4. Name the app `telegram-truenas-bot`, paste the private YAML, and click **Save**.

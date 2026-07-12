@@ -28,9 +28,16 @@ foreach ($entry in @(
     if ([string]::IsNullOrWhiteSpace($entry.Value)) {
         throw "$($entry.Name) cannot be empty."
     }
-    if ($entry.Value -match '["\r\n\\]') {
+    if ($entry.Value -match '[\x00-\x1F\x7F"\\]') {
         throw "$($entry.Name) contains a character that cannot be placed safely in this YAML."
     }
+}
+
+if ($telegramToken -notmatch '^\d+:[A-Za-z0-9_-]+$') {
+    throw 'Telegram token has an invalid format. In Windows PowerShell, paste hidden input with right-click or Ctrl+Shift+V, not plain Ctrl+V.'
+}
+if ($authToken -notmatch '^[A-Za-z0-9_-]+$' -or $ct0 -notmatch '^[A-Za-z0-9_-]+$') {
+    throw 'An X cookie has an invalid format. Copy only the cookie Value and paste with right-click or Ctrl+Shift+V.'
 }
 
 $root = Split-Path -Parent $PSScriptRoot
