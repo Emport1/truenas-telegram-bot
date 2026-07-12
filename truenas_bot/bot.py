@@ -49,7 +49,7 @@ class BotService:
                 conversation = await self.x.conversation(post_id)
             md = render_markdown(conversation).encode()
             js = render_json(conversation).encode()
-            caption = f"Collected {len(conversation.replies)} replies. " + ("Pagination finished." if conversation.complete else "Result hit a configured limit.")
+            caption = f"Collected {len(conversation.replies)} replies. " + ("Visible reply traversal finished." if conversation.complete else "X omitted replies or the configured limit was reached.")
             await update.effective_message.reply_document(io.BytesIO(md), filename=f"x-{post_id}-tree.md", caption=caption)
             await update.effective_message.reply_document(io.BytesIO(js), filename=f"x-{post_id}-graph.json")
             await notice.delete()

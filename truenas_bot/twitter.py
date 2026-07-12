@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from collections import deque
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -42,7 +43,7 @@ class Conversation:
     replies: list[Post]
     complete: bool
     endpoint: str
-    pages: int
+    requests: int
 
 
 class XClient:
@@ -100,30 +101,34 @@ class XClient:
             root = self._post(raw_root)
             found: dict[str, Post] = {}
             reached_limit = False
-            # tweet_thread exposes nested replies for the conversation root. For a
-            # supplied sub-reply, collect the conversation and filter its descendants.
-            conversation_root = int(raw_root.conversationId)
-            async for raw in self.api.tweet_thread(conversation_root, limit=self.max_replies + 1):
-                post = self._post(raw)
-                if post.id != root.id:
+            timeline_gaps = False
+            requests = 0
+            # X's full conversation timeline can omit the descendants of a focal
+            # post when that post is itself a reply. Walk direct-reply endpoints
+            # breadth-first so every returned node keeps its real parent.
+            queue = deque([root])
+            while queue and not reached_limit:
+                parent = queue.popleft()
+                if parent.metrics.get("reply_count", 0) <= 0:
+                    continue
+                requests += 1
+                returned = 0
+                async for raw in self.api.tweet_replies(int(parent.id), limit=self.max_replies + 1):
+                    post = self._post(raw)
+                    if post.id in found or post.id == root.id:
+                        continue
+                    returned += 1
                     found[post.id] = post
-                if len(found) > self.max_replies:
-                    reached_limit = True
-                    break
+                    queue.append(post)
+                    if len(found) >= self.max_replies:
+                        reached_limit = True
+                        break
+                if returned < parent.metrics.get("reply_count", 0):
+                    timeline_gaps = True
         except XApiError:
             raise
         except Exception as exc:
             raise XApiError(f"free X web collector failed: {exc}") from exc
 
-        descendants: dict[str, Post] = {}
-        frontier = {root.id}
-        remaining = found.copy()
-        while frontier:
-            next_frontier: set[str] = set()
-            for key, post in list(remaining.items()):
-                if post.parent_id in frontier:
-                    descendants[key] = remaining.pop(key)
-                    next_frontier.add(key)
-            frontier = next_frontier
-        ordered = sorted(descendants.values(), key=lambda p: (p.created_at, int(p.id)))
-        return Conversation(root, ordered, not reached_limit, "free authenticated web session", 0)
+        ordered = sorted(found.values(), key=lambda p: (p.created_at, int(p.id)))
+        return Conversation(root, ordered, not reached_limit and not timeline_gaps, "free authenticated web session", requests)

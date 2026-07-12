@@ -2,6 +2,7 @@ services:
   bot:
     build: .
     image: truenas-telegram-bot:local
+    pull_policy: build
     restart: unless-stopped
     env_file: .env
     read_only: true

@@ -3,6 +3,7 @@
 services:
   bot:
     image: ghcr.io/emport1/truenas-telegram-bot:latest
+    pull_policy: always
     restart: unless-stopped
     environment:
       TELEGRAM_BOT_TOKEN: "REPLACE_TELEGRAM_TOKEN"

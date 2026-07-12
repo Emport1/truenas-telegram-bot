@@ -22,7 +22,7 @@ def render_markdown(conversation: Conversation) -> str:
     lines = [
         "# X conversation tree", "",
         f"- Root: {conversation.root.url}", f"- Replies collected: {len(conversation.replies)}",
-        f"- Search: `{conversation.endpoint}` ({conversation.pages} page(s))", f"- Collection status: {status}", "",
+        f"- Collector: `{conversation.endpoint}` ({conversation.requests} reply request(s))", f"- Collection status: {status}", "",
     ]
 
     def visit(post: Post, depth: int) -> None:
@@ -41,10 +41,9 @@ def render_markdown(conversation: Conversation) -> str:
 def render_json(conversation: Conversation) -> str:
     posts = [conversation.root, *conversation.replies]
     payload = {
-        "metadata": {"complete": conversation.complete, "search_endpoint": conversation.endpoint, "pages": conversation.pages},
+        "metadata": {"complete": conversation.complete, "collector": conversation.endpoint, "reply_requests": conversation.requests},
         "root_id": conversation.root.id,
         "posts": {p.id: {**asdict(p), "url": p.url} for p in posts},
         "edges": [{"parent_id": p.parent_id, "child_id": p.id} for p in conversation.replies],
     }
     return json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
-

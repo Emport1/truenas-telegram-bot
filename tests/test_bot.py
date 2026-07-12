@@ -37,12 +37,13 @@ def test_extract_post_id_rejects_non_status_url():
         raise AssertionError("invalid URL was accepted")
 
 
-def test_free_collector_filters_siblings_from_subtree(tmp_path):
+def test_free_collector_walks_nested_reply_subtree(tmp_path):
     def raw(id, parent, conversation=1):
         user = SimpleNamespace(id=id, username=f"u{id}", displayname=f"User {id}")
         return SimpleNamespace(
             id=id, rawContent=f"post {id}", user=user, date=datetime.now(timezone.utc),
-            inReplyToTweetId=parent, conversationId=conversation, replyCount=0,
+            inReplyToTweetId=parent, conversationId=conversation,
+            replyCount=1 if id in (2, 3) else 0,
             retweetCount=0, likeCount=0, quoteCount=0,
         )
 
@@ -50,8 +51,9 @@ def test_free_collector_filters_siblings_from_subtree(tmp_path):
         async def tweet_details(self, _):
             return raw(2, 1)
 
-        async def tweet_thread(self, *_args, **_kwargs):
-            for item in (raw(2, 1), raw(3, 2), raw(4, 1), raw(5, 3)):
+        async def tweet_replies(self, tweet_id, **_kwargs):
+            replies = {2: (raw(3, 2),), 3: (raw(5, 3),)}
+            for item in replies.get(tweet_id, ()):
                 yield item
 
     async def run():
